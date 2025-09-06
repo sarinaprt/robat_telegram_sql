@@ -7,7 +7,7 @@ bot=telebot.TeleBot(token_api)
 command={
     "start" : "show information buttons"
 }
-products=["📚 E-Books", "🎵 Music", "🎮 Game Keys"]
+products=["📚 E-Books", "🎵 Music", "theater "]
 
 @bot.message_handler(commands=["start"])
 def send_information(message):
@@ -27,12 +27,19 @@ def contact_answer(message):
 @bot.message_handler(func=lambda mesg:mesg.text=="🛍️ Products")
 def product_answer(message):
     cid=message.chat.id
-
     markup=InlineKeyboardMarkup()
     buttons=[InlineKeyboardButton(text=product ,callback_data=product)  for product in products]
     for i in range(0,len(buttons),3):
         markup.row(*buttons[i:i+3])
     bot.send_message(cid,"chose on category",reply_markup=markup)
+
+@bot.callback_query_handler(func=lambda call:True)
+def answer_call_pro(call):
+    cid=call.message.chat.id
+    print(call)
+    bot.answer
+    
+
 
 @bot.message_handler(content_types=["text"])
 def send_message(message):
