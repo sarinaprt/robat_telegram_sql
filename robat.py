@@ -7,12 +7,15 @@ bot=telebot.TeleBot(token_api)
 command={
     "start" : "show information buttons"
 }
-products=["📚 E-Books", "🎵 Music", "theater "]
+products={
+    "📚 E-Books":["Psychology","Novel","History","Art & Music","Educational"],
+    "🎵 Music"  :[],
+    "theater"   :["Kids & Teens","History"]}
 
 @bot.message_handler(commands=["start"])
 def send_information(message):
     cid=message.chat.id
-    markup=ReplyKeyboardMarkup()
+    markup=ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🛍️ Products", "🛒 Cart")
     markup.add("📦 Track Order", "☎️ Contact Us")
     bot.send_message(cid,"use buttons",reply_markup=markup)
@@ -33,11 +36,18 @@ def product_answer(message):
         markup.row(*buttons[i:i+3])
     bot.send_message(cid,"chose on category",reply_markup=markup)
 
-@bot.callback_query_handler(func=lambda call:True)
+@bot.callback_query_handler(func=lambda call:call.data in products)
 def answer_call_pro(call):
-    cid=call.message.chat.id
+    cid = call.message.chat.id    
     print(call)
-    bot.answer
+    if call.data==products[0]:
+        markup=InlineKeyboardMarkup()
+        buttons=[InlineKeyboardButton(text=book ,callback_data=book) for book in books]
+        for i in range(0,len(buttons),3):
+            markup.row(*buttons[i:i+3])
+    bot.answer_callback_query(call.id,"✅ You clicked the button!")
+    bot.send_message(cid,"book",reply_markup=markup)
+
     
 
 
