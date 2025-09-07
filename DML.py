@@ -27,39 +27,87 @@ def customers():
     cur.close()
     conn.close()
 
-def product():
+
+def book_info():
     config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
     conn=connection.MySQLConnection(**config)
     cur=conn.cursor()
-    cur.execute("""CREATE TABLE product(
-                product_id  INT AUTO_INCREMENT PRIMARY KEY,
-                ID          INT NOT NULL,
-                name_pro    VARCHAR(50) NOT NULL ,
-                Description TEXT,
-                price       DECIMAL(6,0),  
-                stock       INT DEFAULT 0,
-                CREAT       DATETIME DEFAULT CURRENT_TIMESTAMP,
-                last_up     DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                FOREIGN KEY (ID) REFERENCES CUSTOMER(USER_ID)
-                )""")
+    cur.execute("""CREATE TABLE BOOKS(
+                bok_id    INT AUTO_INCREMENT PRIMARY KEY,
+                title     NVARCHAR(50) NOT NULL ,
+                gener     ENUM("Psychology","Novel","History","religious","Educational") NOT NULL,
+                author    NVARCHAR(50),
+                file_url  VARCHAR(225) NOT NULL,
+                creat_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+    )""")
     conn.commit()
     cur.close()
     conn.close()
+
+
+def MUSIC_info():
+    config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+    conn=connection.MySQLConnection(**config)
+    cur=conn.cursor()
+    cur.execute("""CREATE TABLE music(
+                ID_M      INT AUTO_INCREMENT PRIMARY KEY,
+                title     NVARCHAR(50) NOT NULL,
+                file_url  VARCHAR(225) NOT NULL,
+                Format    ENUM('MP3','WAV','FLAC'),
+                Duration  TIME,
+                singer    NVARCHAR(50),
+                creat_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+    )""")
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
+def theater_ticket():
+    config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+    conn=connection.MySQLConnection(**config)
+    cur=conn.cursor()
+    cur.execute("""CREATE TABLE ticket(
+                tk_id     INT AUTO_INCREMENT PRIMARY KEY,
+                title     NVARCHAR(50) NOT NULL,
+                pic_url   VARCHAR(225) NOT NULL,
+                text      NVARCHAR(100),
+                Duration  TIME,
+                price     DECIMAL(7,3) NOT NULL,
+                actors    NVARCHAR(50),
+                creat_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+    )""")
+    conn.commit()
+    cur.close()
+    conn.close()
+
 
 def orders():
     config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
     conn=connection.MySQLConnection(**config)
     cur=conn.cursor()
     cur.execute("""CREATE TABLE orders(
-                ORDER_ID    INT AUTO_INCREMENT PRIMARY KEY,
-                UserId      INT NOT NULL,
-                NAME_ORD    VARCHAR(50) NOT NULL,
-                Status      ENUM('pending','paid','canceled') DEFAULT 'pending',
-                FOREIGN KEY (UserId) REFERENCES CUSTOMER(USER_ID)
-
-                
+                ord_id    INT AUTO_INCREMENT PRIMARY KEY,
+                user_id   INT NOT NULL,
+                creat_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY user_id REFERENCES CUSTOMER(USER_ID)
     )""")
-        
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
+def order_item():
+    config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+    conn=connection.MySQLConnection(**config)
+    cur=conn.cursor()
+    cur.execute("""CREATE TABLE order_item(
+                id INT    AUTO_INCREMENT PRIMARY KEY,
+                ord_id    INT NOT NULL,
+                ITEM_TYPE ENUM("📚 E-Books","🎵 Music","theaters"),
+                quantity  INT DEFAULT 0,
+
+    )""")
     conn.commit()
     cur.close()
     conn.close()
@@ -69,5 +117,8 @@ if __name__=="__main__":
     database="shop_bot"
     database_exsist(database)
     customers()
-    product()
     orders()
+    order_item()
+    book_info()
+    MUSIC_info()
+    theater_ticket()
