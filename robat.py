@@ -1,11 +1,17 @@
 import telebot
 from telebot.types import ReplyKeyboardMarkup,InlineKeyboardMarkup,InlineKeyboardButton
+import DDL
 
 token_api="8264677194:AAFqJObW7ujFUgLajGayei5_bF0dxwypQco"
 bot=telebot.TeleBot(token_api)
 
+admin_id="5580972570"
 command={
-    "start" : "show information buttons"
+    "start" : "show information buttons",
+    
+}
+admin_access={
+    "add_Product":"add product to chanel"
 }
 
 categoey=["theaters","🎵 Music","📚 E-Books"]
@@ -18,9 +24,14 @@ products={
 @bot.message_handler(commands=["start"])
 def send_information(message):
     cid=message.chat.id
+    USERNAME=message.from_user.username  
+    NAME=message.from_user.first_name 
     markup=ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("🛍️ Products", "🛒 Cart")
     markup.add("📦 Track Order", "☎️ Contact Us")
+    id=DDL.chek_customer(cid)
+    if not id:
+        DDL.customer_add(USERNAME,cid,NAME)
     bot.send_message(cid,"use buttons",reply_markup=markup)
 
 @bot.message_handler(func=lambda mesg:mesg.text=="☎️ Contact Us")
@@ -73,19 +84,48 @@ def answer_call_pro(call):
 @bot.callback_query_handler(func=lambda call:call.data in products["📚 E-Books"])
 def book_send(call):
     cid=call.message.chat.id
-    bot.send_message(cid,"")
+    data=call.data
+    books=DDL.search_books(data)
+    if books:
+        for author,gener,title in books:
+            bot.send_message(cid, f"Author: {author}\nGenre: {gener}\nTitle: {title}")  
+    else:
+        bot.send_message(cid,"this gener is emoty")
 
 @bot.callback_query_handler(func=lambda call:call.data in products["theaters"])
 def threar(call):
-    bot.send_message()
+    cid=call.message.chat.id
+    bot.send_message(cid,)
 
 @bot.callback_query_handler(func=lambda call:call.data in products["Music"])
 def music_Answer(call):
-    bot.send_message()
+    cid=call.message.chat.id
+    bot.send_message(cid,)
+
+@bot.message_handler(commands=["add_product"])
+def learn_to_add_pro(message):
+    cid=message.chat.id
+    if cid==int(admin_id):
+        bot.send_message(cid,"add your information like _\ngener:History\nauthor:hah_",parse_mode="Markdown")
+    else:
+        bot.send_message(cid,"can i help you ?")
+
+
+@bot.channel_post_handler(content_types=["document"])
+def channel_post(message):
+    file_id=message.document.file_id
+    name_douc=message.document.file_name
+    caption=message.caption
+    list_info=caption.split("\n")
+    gener=list_info[0].split(":")[-1].strip()
+    author=list_info[1].split(":")[-1].strip()
+    DDL.insert_book(name_douc,gener,author,file_id)
+
 
 @bot.message_handler(content_types=["text"])
 def send_message(message):
-    cid = message.chat.id       
+    cid = message.chat.id 
+    print(message)
     bot.send_message(cid,"can i help you ?")
 
 bot.infinity_polling()

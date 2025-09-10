@@ -15,10 +15,10 @@ def customers():
     conn=connection.MySQLConnection(**config)
     cur=conn.cursor()
     cur.execute("""CREATE TABLE CUSTOMER(
-                USERNAME  NVARCHAR(50) NOT NULL ,
+                USERNAME  NVARCHAR(50) ,
                 USER_ID   INT    AUTO_INCREMENT PRIMARY KEY,
                 CHAT_ID   VARCHAR(100)UNIQUE NOT NULL,
-                PHONE     VARCHAR(20) UNIQUE ,
+                NAME      VARCHAR(50) NOT NULL ,
                 CREATE_AT DATETIME DEFAULT CURRENT_TIMESTAMP,
                 STATUS    DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP  
 
@@ -113,12 +113,11 @@ def order_item():
     conn.close()
 
 
+
 if __name__=="__main__":
     database="shop_bot"
     database_exsist(database)
     customers()
-    orders()
-    order_item()
     book_info()
     MUSIC_info()
     theater_ticket()
