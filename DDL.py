@@ -56,7 +56,7 @@ def search_books(date):
     config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
     conn=connection.MySQLConnection(**config)
     cur=conn.cursor()
-    cur.execute("SELECT author,gener,title FROM books WHERE gener=%s",(date,))
+    cur.execute("SELECT author,title FROM books WHERE gener=%s",(date,))
     book=cur.fetchall()
     cur.close()
     conn.close()
@@ -65,9 +65,37 @@ def search_books(date):
     else:
         return None
 
+def file_url(author,title):
+    config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+    conn=connection.MySQLConnection(**config)
+    cur=conn.cursor()
+    cur.execute("SELECT file_url FROM books WHERE author=%s AND title=%s",(author,title))
+    url=cur.fetchone()
+    cur.close()
+    conn.close()
+    if url:
+        return url[0]
+    else:
+        return None
+    
+def random_books():
+    config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+    conn=connection.MySQLConnection(**config)
+    cur=conn.cursor()
+    cur.execute("SELECT file_url FROM books ")
+    books=cur.fetchall()
+    cur.close()
+    conn.close()
+    if books:
+        print(books)
+        return books
+    else:
+        return None
 
 if __name__=="__main__":
     search_books()
     chek_customer()
     customer_add()
     insert_book()
+    file_url()
+    random_books()

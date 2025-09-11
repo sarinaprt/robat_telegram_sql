@@ -1,6 +1,7 @@
 import telebot
 from telebot.types import ReplyKeyboardMarkup,InlineKeyboardMarkup,InlineKeyboardButton
 import DDL
+import random
 
 token_api="8264677194:AAFqJObW7ujFUgLajGayei5_bF0dxwypQco"
 bot=telebot.TeleBot(token_api)
@@ -87,8 +88,9 @@ def book_send(call):
     data=call.data
     books=DDL.search_books(data)
     if books:
-        for author,gener,title in books:
-            bot.send_message(cid, f"Author: {author}\nGenre: {gener}\nTitle: {title}")  
+        for author,title in books:
+            bot.send_message(cid, f"Author:{author}\nTitle: {title}")  
+        bot.send_message(cid,"write Author:....\nTitle: .....")
     else:
         bot.send_message(cid,"this gener is emoty")
 
@@ -106,7 +108,7 @@ def music_Answer(call):
 def learn_to_add_pro(message):
     cid=message.chat.id
     if cid==int(admin_id):
-        bot.send_message(cid,"add your information like _\ngener:History\nauthor:hah_",parse_mode="Markdown")
+        bot.send_message(cid,"add your information like _\ngener:Psychology,Novel,History,Art & Music,Educational\nauthor:name_author_",parse_mode="Markdown")
     else:
         bot.send_message(cid,"can i help you ?")
 
@@ -117,10 +119,28 @@ def channel_post(message):
     name_douc=message.document.file_name
     caption=message.caption
     list_info=caption.split("\n")
-    gener=list_info[0].split(":")[-1].strip()
-    author=list_info[1].split(":")[-1].strip()
+    gener=list_info[0].split(":")[-1].strip().lower()
+    author=list_info[1].split(":")[-1].strip().lower()
     DDL.insert_book(name_douc,gener,author,file_id)
 
+@bot.message_handler(content_types=["text"])
+def message_find(message):
+    cid=message.chat.id
+    text=message.text.split("\n")
+    author=text[0].split(":")[-1].strip().lower()
+    title=text[1].split(":")[-1].strip().lower()
+    url=DDL.file_url(author,title)
+    bot.send_document(cid,url)
+
+@bot.message_handler(func=lambda call:call.data=="random")
+def random_book(call):
+    cid=call.message.chat.id
+    books=DDL.random_books()
+    random=random.choice(books)
+    bot.send_message(cid,random)
+
+    
+    
 
 @bot.message_handler(content_types=["text"])
 def send_message(message):
