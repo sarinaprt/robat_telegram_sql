@@ -56,11 +56,11 @@ def search_books(date):
     config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
     conn=connection.MySQLConnection(**config)
     cur=conn.cursor()
-    cur.execute("SELECT author,title FROM books WHERE gener=%s",(date,))
+    cur.execute("SELECT author,GROUP_CONCAT(title) as titles FROM books WHERE gener=%s GROUP BY author" ,(date,))
     book=cur.fetchall()
     cur.close()
     conn.close()
-    if date:
+    if book:
         return book
     else:
         return None
@@ -69,7 +69,7 @@ def file_url(author,title):
     config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
     conn=connection.MySQLConnection(**config)
     cur=conn.cursor()
-    cur.execute("SELECT file_url FROM books WHERE author=%s AND title=%s",(author,title))
+    cur.execute("SELECT file_url FROM books WHERE author=%s AND title=%s GROUP BY author",(author,title))
     url=cur.fetchone()
     cur.close()
     conn.close()
@@ -82,7 +82,7 @@ def random_books():
     config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
     conn=connection.MySQLConnection(**config)
     cur=conn.cursor()
-    cur.execute("SELECT file_url FROM books ")
+    cur.execute("SELECT title,author,file_url FROM books ")
     books=cur.fetchall()
     cur.close()
     conn.close()
@@ -91,11 +91,32 @@ def random_books():
         return books
     else:
         return None
+    
+def author_title(title,author):
+    config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+    conn=connection.MySQLConnection(**config)
+    cur=conn.cursor()
+    cur.execute("SELECT author,file_url FROM books WHERE title=%s AND author=%s",(title,author))
+    cur.close()
+    conn.close()
+
+def find_author(author):
+    config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+    conn=connection.MySQLConnection(**config)
+    cur=conn.cursor()
+    cur.execute("SELECT ")
+    cur.close()
+    conn.close()
+
 
 if __name__=="__main__":
     search_books()
-    chek_customer()
+    author_title()
+    random_books()
     customer_add()
     insert_book()
+    insert_music()
+    insert_theater()
     file_url()
-    random_books()
+    chek_customer()
+
