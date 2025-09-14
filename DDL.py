@@ -11,33 +11,6 @@ def customer_add(USERNAME,CHAT_ID,NAME):
     cur.close()
     conn.close()
 
-def insert_book(title ,gener,author,file_url):
-    config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
-    conn=connection.MySQLConnection(**config)
-    cur=conn.cursor()
-    cur.execute("INSERT INTO BOOKS(title ,gener,author,file_url)VALUES (%s,%s,%s,%s)",(title ,gener,author,file_url))
-    conn.commit()
-    cur.close()
-    conn.close()
-
-def insert_music():
-    config={"user":"root","host":"localhost","password":"belive_gof1527","database":"shop_bot"}
-    conn=connection.MySQLConnection(**config)
-    cur=conn.cursor()
-    cur.execute("""""")
-    conn.commit()
-    cur.close()
-    conn.close()
-
-def insert_theater():
-    config={"user":"root","host":"localhost","password":"belive_gof1527","database":"shop_bot"}
-    conn=connection.MySQLConnection(**config)
-    cur=conn.cursor()
-    cur.execute("""""")
-    conn.commit()
-    cur.close()
-    conn.close()
-
 def chek_customer(CHAT_ID):
     config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
     conn=connection.MySQLConnection(**config)
@@ -51,7 +24,16 @@ def chek_customer(CHAT_ID):
         return chat_id[0]
     else:
         return None
-    
+
+def insert_book(title ,gener,author,file_url):
+    config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+    conn=connection.MySQLConnection(**config)
+    cur=conn.cursor()
+    cur.execute("INSERT INTO BOOKS(title ,gener,author,file_url)VALUES (%s,%s,%s,%s)",(title ,gener,author,file_url))
+    conn.commit()
+    cur.close()
+    conn.close()
+
 def search_books(date):
     config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
     conn=connection.MySQLConnection(**config)
@@ -69,12 +51,12 @@ def file_url(author,title):
     config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
     conn=connection.MySQLConnection(**config)
     cur=conn.cursor()
-    cur.execute("SELECT file_url FROM books WHERE author=%s AND title=%s GROUP BY author",(author,title))
-    url=cur.fetchone()
+    cur.execute("SELECT file_url FROM books WHERE author=%s AND title=%s",(author,title))
+    url=cur.fetchall()
     cur.close()
     conn.close()
     if url:
-        return url[0]
+        return url[0][0]
     else:
         return None
     
@@ -91,31 +73,21 @@ def random_books():
         return books
     else:
         return None
-    
-def author_title(title,author):
+
+def insert_theater(title,pic_url,text,Duration,price,actors):
     config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
     conn=connection.MySQLConnection(**config)
     cur=conn.cursor()
-    cur.execute("SELECT author,file_url FROM books WHERE title=%s AND author=%s",(title,author))
+    cur.execute("INSERT INTO ticket(title,pic_url,text,Duration,price,actors)VALUES(%s,%s,%s,%s,%s,%s)",(title,pic_url,text,Duration,price,actors))
+    conn.commit()
     cur.close()
     conn.close()
-
-def find_author(author):
-    config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
-    conn=connection.MySQLConnection(**config)
-    cur=conn.cursor()
-    cur.execute("SELECT ")
-    cur.close()
-    conn.close()
-
-
+                
 if __name__=="__main__":
     search_books()
-    author_title()
     random_books()
     customer_add()
     insert_book()
-    insert_music()
     insert_theater()
     file_url()
     chek_customer()

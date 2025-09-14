@@ -29,6 +29,16 @@ def learn_to_add_pro(message):
     else:
         bot.send_message(cid,"can i help you ?")
 
+@bot.channel_post_handler(content_types=["document"])
+def channel_post(message):
+    file_id=message.document.file_id
+    name_douc=message.document.file_name
+    caption=message.caption
+    list_info=caption.split("\n")
+    gener=list_info[0].split(":")[-1].strip().lower()
+    author=list_info[1].split(":")[-1].strip().lower()
+    DDL.insert_book(name_douc,gener,author,file_id)
+
 @bot.message_handler(commands=["start"])
 def send_information(message):
     cid=message.chat.id
@@ -100,27 +110,6 @@ def book_send(call):
     else:
         bot.send_message(cid,"this gener is emoty")
 
-@bot.callback_query_handler(func=lambda call:call.data in products["theaters"])
-def threar(call):
-    cid=call.message.chat.id
-    bot.send_message(cid,)
-
-@bot.callback_query_handler(func=lambda call:call.data in products["Music"])
-def music_Answer(call):
-    cid=call.message.chat.id
-    bot.send_message(cid,)
-
-@bot.channel_post_handler(content_types=["document"])
-def channel_post(message):
-    file_id=message.document.file_id
-    name_douc=message.document.file_name
-    caption=message.caption
-    list_info=caption.split("\n")
-    gener=list_info[0].split(":")[-1].strip().lower()
-    author=list_info[1].split(":")[-1].strip().lower()
-    DDL.insert_book(name_douc,gener,author,file_id)
-
-
 @bot.callback_query_handler(func=lambda call:call.data=="random")
 def random_book(call):
     cid=call.message.chat.id
@@ -137,25 +126,50 @@ def random_book(call):
 @bot.callback_query_handler(func=lambda call:call.data=="📝 Search by Title/Author")
 def author_title(call):
     cid=call.message.chat.id
-    bot.send_message(cid,"write author and title like:\n'author:author \n title:title'")
+    bot.send_message(cid,"write author and title like:\n-author:author \n title:title-",parse_mode="Markdown")
 
+
+@bot.callback_query_handler(func=lambda call:call.data in products["theaters"])
+def threar(call):
+    cid=call.message.chat.id
+    print(call)
+    gener=call.data
+    bot.send_message(cid,"hh")
+
+@bot.channel_post_handler(content_types=["photo"])
+def achive_photo(message):
+    photo_url=message.photo[-1].file_id
+    caption=message.caption.split("\n")
+    title=caption[0]
+    text=caption[1]
+    Duration=caption[2]
+    price=caption[3]
+    actors=caption[4]
+    DDL.insert_theater(title,photo_url,text,Duration,price,actors)
+
+
+
+@bot.callback_query_handler(func=lambda call:call.data in products["Music"])
+def music_Answer(call):
+    cid=call.message.chat.id
+    bot.send_message(cid,)
 
 
 @bot.message_handler(content_types=["text"])
 def message_find(message):
-    cid=message.chat.id
-    text=message.text.split("\n")
-    author=text[0].split(":")[-1].strip().lower()
-    title=text[1].split(":")[-1].strip().lower()
-    url=DDL.file_url(author,title)
-    bot.send_document(cid,url)
-
-
-
-@bot.message_handler(content_types=["text"])
-def send_message(message):
-    cid = message.chat.id 
-    print(message)
-    bot.send_message(cid,"can i help you ?")
+    if message.text.startswith(("Author","author")):#((text),index)
+        cid=message.chat.id
+        text=message.text.split("\n")
+        author=text[0].split(":")[-1].strip("- ").lower()
+        title=text[1].split(":")[-1].strip("- ").lower()
+        url=DDL.file_url(author,title)
+        if url:
+            bot.send_document(cid,url)
+        else:
+            bot.send_message(cid,"sorry we dont have this book right know ")
+    else:
+        cid=message.chat.id
+        print(message)
+        bot.send_message(cid,"can i help you ?")
 
 bot.infinity_polling()
