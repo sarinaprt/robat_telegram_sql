@@ -11,15 +11,20 @@ command={
     "start" : "show information buttons",
     
 }
+
 admin_access={
     "add_Product":"add product to chanel"
 }
 
 categoey=["theaters","🎵 Music","📚 E-Books"]
 products={
-    "📚 E-Books":["Psychology","Novel","History","Art & Music","Educational"],
-     "theaters" :["Comedy","Social","History"],
+    "📚 E-Books":["📔 Psychology","📔 Novel","📔 History","📔 Art & Music","📔 Educational"],
+     "theaters" :["🎭 Comedy","🎭 Drama","🎭 Children","🎭 Musical","🎭 Historical"],
      "Music"    :[]}
+
+list=["➕️","number","➖","buy","cancel"]
+status={}
+
 
 @bot.message_handler(commands=["add_product"])
 def learn_to_add_pro(message):
@@ -99,7 +104,8 @@ def answer_call_pro(call):
 @bot.callback_query_handler(func=lambda call:call.data in products["📚 E-Books"])
 def book_send(call):
     cid=call.message.chat.id
-    data=call.data
+    data=call.data.strip("📔 ")
+    print(call)
     books=DDL.search_books(data)
     if books:
         for author,titles in books:
@@ -129,12 +135,67 @@ def author_title(call):
     bot.send_message(cid,"write author and title like:\n-author:author \n title:title-",parse_mode="Markdown")
 
 
+
+
+
+
+
+
+
+def get_markup_button(quantity):
+    markup=InlineKeyboardMarkup()
+    markup=InlineKeyboardMarkup()
+    add_but=InlineKeyboardButton(text="➕️" , callback_data=f"edit_{quantity+1}"if quantity>1 else "disabled")
+    number_but=InlineKeyboardButton(text=str(quantity),callback_data="number")
+    remove_but=InlineKeyboardButton(text="➖",callback_data=f"edit_{quantity-1}")
+    next_but=InlineKeyboardButton(text="next",callback_data="next")
+    cancel_but=InlineKeyboardButton(text="cancel",callback_data="cancel")
+    markup.add(add_but,number_but,remove_but)
+    markup.add(cancel_but,next_but)
+
 @bot.callback_query_handler(func=lambda call:call.data in products["theaters"])
 def threar(call):
-    cid=call.message.chat.id
-    print(call)
-    gener=call.data
-    bot.send_message(cid,"hh")
+    cid=call.from_user.id
+    gener=call.data.strip("🎭 ")
+    theat=DDL.theater(gener)
+    if theat:
+        len_list_thaeter=len(theat)
+        index=0
+        title=theat[index][0]
+        text=theat[index][1]
+        Duration=theat[index][2]
+        price=theat[index][3]
+        actors=theat[index][4]
+        pic_url=theat[index][5]
+        caption=f"{title}\n{text}\ntime:{Duration}\nprice:{price}\nactors:{actors}"
+        buttons=get_markup_button(1)
+        bot.send_photo(cid,pic_url,caption=caption,reply_markup=buttons)
+
+@bot.callback_query_handler(func=lambda call:call.data in list)
+def buton_shop(call):
+    cid=call.from_user.id
+    data=call.data
+    if data=="➕️":
+        bot.edit_message_reply_markup(cid)
+    elif data=="➖":
+            bot.edit_message_reply_markup(cid)
+    elif data=="buy":
+        pass
+    elif data=="cancel":
+        pass
+            
+            
+
+
+
+
+
+
+
+
+@bot.callback_query_handler(func=lambda call:call.data in list)
+def buy_or_cancel(call):
+    pass   
 
 @bot.channel_post_handler(content_types=["photo"])
 def achive_photo(message):
@@ -146,13 +207,6 @@ def achive_photo(message):
     price=caption[3]
     actors=caption[4]
     DDL.insert_theater(title,photo_url,text,Duration,price,actors)
-
-
-
-@bot.callback_query_handler(func=lambda call:call.data in products["Music"])
-def music_Answer(call):
-    cid=call.message.chat.id
-    bot.send_message(cid,)
 
 
 @bot.message_handler(content_types=["text"])

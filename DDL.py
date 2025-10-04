@@ -83,6 +83,20 @@ def insert_theater(title,pic_url,text,Duration,price,actors):
     cur.close()
     conn.close()
                 
+def theater(gener):
+    config={"user":"root","password":"belive_god1527","host":"localhost","database":"shop_bot"}
+    conn=connection.MySQLConnection(**config)
+    cur=conn.cursor()
+    cur.execute("SELECT title,text,Duration,price,actors,pic_url FROM ticket WHERE gener=%s",(gener,))
+    url=cur.fetchall()
+    cur.close()
+    conn.close() 
+    if url:
+        return url
+    else:
+        return None
+    
+
 if __name__=="__main__":
     search_books()
     random_books()
@@ -91,4 +105,4 @@ if __name__=="__main__":
     insert_theater()
     file_url()
     chek_customer()
-
+    theater()

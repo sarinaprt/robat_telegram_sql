@@ -70,6 +70,7 @@ def theater_ticket():
     cur.execute("""CREATE TABLE ticket(
                 tk_id     INT AUTO_INCREMENT PRIMARY KEY,
                 title     NVARCHAR(50) NOT NULL,
+                gener     ENUM("Comedy","Drama","Children","Musical","Historical") NOT NULL,
                 pic_url   VARCHAR(225) NOT NULL,
                 text      NVARCHAR(100),
                 Duration  TIME,
