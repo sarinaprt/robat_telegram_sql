@@ -22,9 +22,6 @@ products={
      "theaters" :["🎭 Comedy","🎭 Drama","🎭 Children","🎭 Musical","🎭 Historical"],
      "Music"    :[]}
 
-list=["➕️","number","➖","buy","cancel"]
-status={}
-
 
 @bot.message_handler(commands=["add_product"])
 def learn_to_add_pro(message):
@@ -135,28 +132,27 @@ def author_title(call):
     bot.send_message(cid,"write author and title like:\n-author:author \n title:title-",parse_mode="Markdown")
 
 
-
-
-
-
-
-
-
 def get_markup_button(quantity):
     markup=InlineKeyboardMarkup()
-    markup=InlineKeyboardMarkup()
-    add_but=InlineKeyboardButton(text="➕️" , callback_data=f"edit_{quantity+1}"if quantity>1 else "disabled")
+    add_but=InlineKeyboardButton(text="➕️" , callback_data=f"edit_{quantity+1}")
     number_but=InlineKeyboardButton(text=str(quantity),callback_data="number")
-    remove_but=InlineKeyboardButton(text="➖",callback_data=f"edit_{quantity-1}")
+    remove_but=InlineKeyboardButton(text="➖",callback_data=f"edit_{quantity-1}"if quantity>1 else "disabled")
     next_but=InlineKeyboardButton(text="next",callback_data="next")
+    buy_but=InlineKeyboardButton(text="buy",callback_data="buy")
     cancel_but=InlineKeyboardButton(text="cancel",callback_data="cancel")
     markup.add(add_but,number_but,remove_but)
-    markup.add(cancel_but,next_but)
+    markup.add(cancel_but,buy_but,next_but)
+    return markup
 
 @bot.callback_query_handler(func=lambda call:call.data in products["theaters"])
 def threar(call):
     cid=call.from_user.id
     gener=call.data.strip("🎭 ")
+    caption,pic_url=threaters(gener,0)
+    buttons=get_markup_button(1)
+    bot.send_photo(cid,pic_url,caption=caption,reply_markup=buttons)
+
+def threaters(gener,index):
     theat=DDL.theater(gener)
     if theat:
         len_list_thaeter=len(theat)
@@ -168,34 +164,26 @@ def threar(call):
         actors=theat[index][4]
         pic_url=theat[index][5]
         caption=f"{title}\n{text}\ntime:{Duration}\nprice:{price}\nactors:{actors}"
-        buttons=get_markup_button(1)
-        bot.send_photo(cid,pic_url,caption=caption,reply_markup=buttons)
+        return caption ,pic_url
 
-@bot.callback_query_handler(func=lambda call:call.data in list)
+        
+@bot.callback_query_handler(func=lambda call:True)
 def buton_shop(call):
+    print(call)
     cid=call.from_user.id
     data=call.data
-    if data=="➕️":
-        bot.edit_message_reply_markup(cid)
-    elif data=="➖":
-            bot.edit_message_reply_markup(cid)
-    elif data=="buy":
-        pass
-    elif data=="cancel":
-        pass
-            
-            
-
-
-
-
-
-
-
-
-@bot.callback_query_handler(func=lambda call:call.data in list)
-def buy_or_cancel(call):
-    pass   
+    messageid=call.message.message_id
+    print(data)
+    print(f"{call.from_user.id}:{call.message.chat.id}")
+    if data.startswith("edit"):
+        command,quantity=data.split("_")
+        if int(quantity)<1:
+            bot.answer_callback_query(call.id,"❌ Quantity cannot be less than 1")
+        bot.edit_message_reply_markup(cid,messageid,reply_markup=get_markup_button(int(quantity)))
+    elif data=="disabled":
+        bot.answer_callback_query(call.id,"❌ Quantity cannot be less than 1")
+    elif data=="next":
+        index +=1
 
 @bot.channel_post_handler(content_types=["photo"])
 def achive_photo(message):
