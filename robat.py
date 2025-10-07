@@ -1,5 +1,5 @@
 import telebot
-from telebot.types import ReplyKeyboardMarkup,InlineKeyboardMarkup,InlineKeyboardButton
+from telebot.types import ReplyKeyboardMarkup,InlineKeyboardMarkup,InlineKeyboardButton,InputMediaPhoto
 import DDL
 import random
 
@@ -132,12 +132,14 @@ def author_title(call):
     bot.send_message(cid,"write author and title like:\n-author:author \n title:title-",parse_mode="Markdown")
 
 
-def get_markup_button(quantity):
+def get_markup_button(quantity,index,gener):
+    quantity=int(quantity)
+    index=int(index)
     markup=InlineKeyboardMarkup()
-    add_but=InlineKeyboardButton(text="➕️" , callback_data=f"edit_{quantity+1}")
+    add_but=InlineKeyboardButton(text="➕️" , callback_data=f"edit_{quantity+1}_{index}_{gener}")
     number_but=InlineKeyboardButton(text=str(quantity),callback_data="number")
-    remove_but=InlineKeyboardButton(text="➖",callback_data=f"edit_{quantity-1}"if quantity>1 else "disabled")
-    next_but=InlineKeyboardButton(text="next",callback_data="next")
+    remove_but=InlineKeyboardButton(text="➖",callback_data=f"edit_{quantity-1}_{index}_{gener}"if quantity>1 else "disabled")
+    next_but=InlineKeyboardButton(text="next",callback_data=f"next_{index+1}_{gener}_{quantity}")
     buy_but=InlineKeyboardButton(text="buy",callback_data="buy")
     cancel_but=InlineKeyboardButton(text="cancel",callback_data="cancel")
     markup.add(add_but,number_but,remove_but)
@@ -148,23 +150,26 @@ def get_markup_button(quantity):
 def threar(call):
     cid=call.from_user.id
     gener=call.data.strip("🎭 ")
-    caption,pic_url=threaters(gener,0)
-    buttons=get_markup_button(1)
+    caption,pic_url,len_list=threaters(gener,0)
+    buttons=get_markup_button(1,0,gener)
     bot.send_photo(cid,pic_url,caption=caption,reply_markup=buttons)
 
 def threaters(gener,index):
     theat=DDL.theater(gener)
     if theat:
-        len_list_thaeter=len(theat)
-        index=0
-        title=theat[index][0]
-        text=theat[index][1]
-        Duration=theat[index][2]
-        price=theat[index][3]
-        actors=theat[index][4]
-        pic_url=theat[index][5]
-        caption=f"{title}\n{text}\ntime:{Duration}\nprice:{price}\nactors:{actors}"
-        return caption ,pic_url
+        index=int(index)
+        len_list=len(theat)
+        if len_list>=index:
+            title=theat[index][0]
+            text=theat[index][1]
+            Duration=theat[index][2]
+            price=theat[index][3]
+            actors=theat[index][4]
+            pic_url=theat[index][5]
+            caption=f"{title}\n{text}\ntime:{Duration}\nprice:{price}\nactors:{actors}"
+            return caption ,pic_url,len_list
+        else:
+            return None,None,None
 
         
 @bot.callback_query_handler(func=lambda call:True)
@@ -176,14 +181,22 @@ def buton_shop(call):
     print(data)
     print(f"{call.from_user.id}:{call.message.chat.id}")
     if data.startswith("edit"):
-        command,quantity=data.split("_")
-        if int(quantity)<1:
+        command,quantity,index,gener=data.split("_")
+        quantity=int(quantity)
+        if quantity<1:
             bot.answer_callback_query(call.id,"❌ Quantity cannot be less than 1")
-        bot.edit_message_reply_markup(cid,messageid,reply_markup=get_markup_button(int(quantity)))
+        bot.edit_message_reply_markup(chat_id=cid,message_id=messageid,reply_markup=get_markup_button(quantity,index,gener))
     elif data=="disabled":
         bot.answer_callback_query(call.id,"❌ Quantity cannot be less than 1")
-    elif data=="next":
-        index +=1
+    elif data.startswith("next"):
+        command,index,gener,quantity=data.split("_")
+        caption,pic_url,len_list=threaters(gener,index)
+        index=int(index)
+        quantity=int(quantity)
+        len_list=int(len_list)
+        markup=get_markup_button(quantity,index,gener)
+        bot.edit_message_media(media=InputMediaPhoto(media=pic_url,caption=caption),chat_id=cid,message_id=messageid,reply_markup=markup)
+
 
 @bot.channel_post_handler(content_types=["photo"])
 def achive_photo(message):
