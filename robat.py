@@ -140,7 +140,7 @@ def get_markup_button(quantity,index,gener):
     number_but=InlineKeyboardButton(text=str(quantity),callback_data="number")
     remove_but=InlineKeyboardButton(text="➖",callback_data=f"edit_{quantity-1}_{index}_{gener}"if quantity>1 else "disabled")
     next_but=InlineKeyboardButton(text="next",callback_data=f"next_{index+1}_{gener}_{quantity}")
-    buy_but=InlineKeyboardButton(text="buy",callback_data="buy")
+    buy_but=InlineKeyboardButton(text="buy",callback_data=f"buy_{quantity}")
     cancel_but=InlineKeyboardButton(text="cancel",callback_data="cancel")
     markup.add(add_but,number_but,remove_but)
     markup.add(cancel_but,buy_but,next_but)
@@ -159,7 +159,7 @@ def threaters(gener,index):
     if theat:
         index=int(index)
         len_list=len(theat)
-        if len_list>=index:
+        if index<=len_list:
             title=theat[index][0]
             text=theat[index][1]
             Duration=theat[index][2]
@@ -169,7 +169,7 @@ def threaters(gener,index):
             caption=f"{title}\n{text}\ntime:{Duration}\nprice:{price}\nactors:{actors}"
             return caption ,pic_url,len_list
         else:
-            return None,None,None
+            return None,None,len_list
 
         
 @bot.callback_query_handler(func=lambda call:True)
@@ -196,7 +196,15 @@ def buton_shop(call):
         len_list=int(len_list)
         markup=get_markup_button(quantity,index,gener)
         bot.edit_message_media(media=InputMediaPhoto(media=pic_url,caption=caption),chat_id=cid,message_id=messageid,reply_markup=markup)
-
+    elif data.startswith("buy"):
+        command,quantity=data.split("_")
+        bot.send_message(cid,text=f"your total price is :{quantity}\n please pay with this card number *+++++++++*\n then send the screan shot",parse_mode="Markdown")
+    elif data=="cancel":
+        bot.delete_message(cid,messageid)
+@bot.message_handler(content_types=["photo"])
+def send_pic(message):
+    cid=message.chat.id
+    bot.send_message(cid,"let me check it")
 
 @bot.channel_post_handler(content_types=["photo"])
 def achive_photo(message):
