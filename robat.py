@@ -109,7 +109,7 @@ def book_send(call):
             title=titles.split(",")
             tt="\n".join([f"- {ti}" for ti in title])
             bot.send_message(cid, f"Author:{author}\nTitle:{tt}")  
-        bot.send_message(cid,"write Author:....\nTitle: .....")
+        bot.send_message(cid,"copy with one you want and pased it")
     else:
         bot.send_message(cid,"this gener is emoty")
 
@@ -141,9 +141,11 @@ def get_markup_button(quantity,index,gener):
     remove_but=InlineKeyboardButton(text="➖",callback_data=f"edit_{quantity-1}_{index}_{gener}"if quantity>1 else "disabled")
     next_but=InlineKeyboardButton(text="next",callback_data=f"next_{index+1}_{gener}_{quantity}")
     buy_but=InlineKeyboardButton(text="buy",callback_data=f"buy_{quantity}")
+    previous_but=InlineKeyboardButton(text="previous",callback_data=f"previous_{index-1}_{gener}_{quantity}")
     cancel_but=InlineKeyboardButton(text="cancel",callback_data="cancel")
-    markup.add(add_but,number_but,remove_but)
-    markup.add(cancel_but,buy_but,next_but)
+    markup.add(remove_but,number_but,add_but)
+    markup.add(previous_but,buy_but,next_but)
+    markup.add(cancel_but)
     return markup
 
 @bot.callback_query_handler(func=lambda call:call.data in products["theaters"])
@@ -151,14 +153,19 @@ def threar(call):
     cid=call.from_user.id
     gener=call.data.strip("🎭 ")
     caption,pic_url,len_list=threaters(gener,0)
-    buttons=get_markup_button(1,0,gener)
-    bot.send_photo(cid,pic_url,caption=caption,reply_markup=buttons)
+    if caption is not  None and pic_url is not None:
+        buttons=get_markup_button(1,0,gener)
+        bot.send_photo(cid,pic_url,caption=caption,reply_markup=buttons)
+    else:
+        bot.send_message(cid,"this gener is emoty")
+
 
 def threaters(gener,index):
     theat=DDL.theater(gener)
     if theat:
         index=int(index)
         len_list=len(theat)
+        len_list=len_list-1
         if index<=len_list:
             title=theat[index][0]
             text=theat[index][1]
@@ -170,6 +177,8 @@ def threaters(gener,index):
             return caption ,pic_url,len_list
         else:
             return None,None,len_list
+    else:
+        return None,None,None
 
         
 @bot.callback_query_handler(func=lambda call:True)
@@ -191,16 +200,31 @@ def buton_shop(call):
     elif data.startswith("next"):
         command,index,gener,quantity=data.split("_")
         caption,pic_url,len_list=threaters(gener,index)
+        if caption is not None and pic_url is not None:
+            index=int(index)
+            quantity=int(quantity)
+            len_list=int(len_list)
+            markup=get_markup_button(quantity,index,gener)
+            bot.edit_message_media(media=InputMediaPhoto(media=pic_url,caption=caption),chat_id=cid,message_id=messageid,reply_markup=markup)
+        else:
+            bot.answer_callback_query(call.id, "❌ No more items.")            
+    elif data.startswith("previous"):
+        command,index,gener,quantity=data.split("_")
         index=int(index)
         quantity=int(quantity)
-        len_list=int(len_list)
-        markup=get_markup_button(quantity,index,gener)
-        bot.edit_message_media(media=InputMediaPhoto(media=pic_url,caption=caption),chat_id=cid,message_id=messageid,reply_markup=markup)
+        caption,pic_url,len_list=threaters(gener,index)
+        if caption is not None and pic_url is not None:
+            markup=get_markup_button(quantity,index,gener)
+            bot.edit_message_media(media=InputMediaPhoto(media=pic_url,caption=caption),chat_id=cid,message_id=messageid,reply_markup=markup)
+        else:
+            pass
     elif data.startswith("buy"):
         command,quantity=data.split("_")
         bot.send_message(cid,text=f"your total price is :{quantity}\n please pay with this card number *+++++++++*\n then send the screan shot",parse_mode="Markdown")
     elif data=="cancel":
         bot.delete_message(cid,messageid)
+
+        
 @bot.message_handler(content_types=["photo"])
 def send_pic(message):
     cid=message.chat.id
