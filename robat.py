@@ -16,11 +16,11 @@ admin_access={
     "add_Product":"add product to chanel"
 }
 
-categoey=["theaters","🎵 Music","📚 E-Books"]
+categoey=["theaters","📚 E-Books"]
 products={
     "📚 E-Books":["📔 Psychology","📔 Novel","📔 History","📔 Art & Music","📔 Educational"],
      "theaters" :["🎭 Comedy","🎭 Drama","🎭 Children","🎭 Musical","🎭 Historical"],
-     "Music"    :[]}
+     }
 
 
 @bot.message_handler(commands=["add_product"])
@@ -47,12 +47,22 @@ def send_information(message):
     USERNAME=message.from_user.username  
     NAME=message.from_user.first_name 
     markup=ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add("🛍️ Products", "🛒 Cart")
-    markup.add("📦 Track Order", "☎️ Contact Us")
+    markup.add("🛍️ Products", "shop_history🛒")
+    markup.add("📊 Daily / Monthly Report", "☎️ Contact Us")
     id=DDL.chek_customer(cid)
     if not id:
         DDL.customer_add(USERNAME,cid,NAME)
     bot.send_message(cid,"use buttons",reply_markup=markup)
+
+@bot.message_handler(func=lambda mesg:mesg.text=="📊 Daily / Monthly Report")
+def message_report(message):
+    cid=message.chat.id
+    bot.send_message(cid,"this button is not ready")
+
+@bot.message_handler(fun=lambda mesg:mesg.text=="shop_history🛒")
+def history_shp(message):
+    cid=message.chat.id
+    bot.send_message(cid,"this button is not ready")
 
 @bot.message_handler(func=lambda mesg:mesg.text=="☎️ Contact Us")
 def contact_answer(message):
@@ -84,11 +94,6 @@ def answer_call_pro(call):
         bot.answer_callback_query(call.id,"✅ You clicked the  E-Books button!")
         bot.send_message(cid,"✨ Pick a way to search for books",reply_markup=markup)
 
-    elif call.data=="🎵 Music":
-        cid=call.message.chat.id
-        bot.send_message(cid,"wite name or singer or a part of the lyrics and let me find it for you ")
-        bot.answer_callback_query(call.id,"✅ You clicked the  Music button!")
-
     elif call.data=="theaters":
         cid=call.message.chat.id
         markup=InlineKeyboardMarkup()
@@ -97,6 +102,7 @@ def answer_call_pro(call):
             markup.row(*buttons[i:i+3])
         bot.send_message(cid,"chose theater you want",reply_markup=markup)
         bot.answer_callback_query(call.id,"✅ You clicked the theater button!")
+
 
 @bot.callback_query_handler(func=lambda call:call.data in products["📚 E-Books"])
 def book_send(call):
