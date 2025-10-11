@@ -96,6 +96,21 @@ def theater(gener):
     else:
         return None
     
+def user_active():
+    config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+    conn=connection.MySQLConnection(**config)
+    cur=conn.cursor()
+    cur.execute("""select c.USER_ID,c.USERNAME from customers c
+                inner join orders o on c.id=o.user_id 
+                group by c.id
+                having date(max(o.creat_at))=date(now()) """)
+    active=cur.fetchall()
+    cur.close()
+    conn.close()
+    if active:
+        return active
+
+
 
 if __name__=="__main__":
     search_books()
@@ -106,3 +121,4 @@ if __name__=="__main__":
     file_url()
     chek_customer()
     theater()
+    user_active()

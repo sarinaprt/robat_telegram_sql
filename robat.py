@@ -8,13 +8,13 @@ bot=telebot.TeleBot(token_api)
 
 admin_id="5580972570"
 command={
-    "start" : "show information buttons",
+    "start" : "show information buttons"
     
 }
 
 admin_access={
-    "add_Product":"add product to chanel"
-}
+    "add_bookfile":"instruction how to add file",
+    "add_photo":"instruction how to add photo"}
 
 categoey=["theaters","📚 E-Books"]
 products={
@@ -23,23 +23,50 @@ products={
      }
 
 
-@bot.message_handler(commands=["add_product"])
-def learn_to_add_pro(message):
+@bot.message_handler(commands=["document"])
+def add_dacu(message):
     cid=message.chat.id
-    if cid==int(admin_id):
-        bot.send_message(cid,"add your information like _\ngener:Psychology,Novel,History,Art & Music,Educational\nauthor:name_author_",parse_mode="Markdown")
-    else:
-        bot.send_message(cid,"can i help you ?")
+    bot.send_message(cid,"add your information like \ngener:Psychology,Novel,History,Art & Music,Educational\nauthor:name_author_")
+
+
+@bot.message_handler(commands=["add_photo"])
+def add_photo(message):
+    cid=message.chat.id
+    bot.send_message(cid,"title\ntext\nDuration\nprice\nactors \ndont write the topic of each for example title:title ✖ only title ✔")
+
 
 @bot.channel_post_handler(content_types=["document"])
 def channel_post(message):
-    file_id=message.document.file_id
-    name_douc=message.document.file_name
     caption=message.caption
-    list_info=caption.split("\n")
-    gener=list_info[0].split(":")[-1].strip().lower()
-    author=list_info[1].split(":")[-1].strip().lower()
-    DDL.insert_book(name_douc,gener,author,file_id)
+    if caption:
+        file_id=message.document.file_id
+        name_douc=message.document.file_name
+        list_info=caption.split("\n")
+        gener=list_info[0].split(":")[-1].strip().lower()
+        author=list_info[1].split(":")[-1].strip().lower()
+        DDL.insert_book(name_douc,gener,author,file_id)
+    else:
+        cid=int(admin_id)
+        bot.send_message(cid,"❌ Error: Caption is empty. Please send all required information\n /document.")
+
+@bot.channel_post_handler(content_types=["photo"])
+def achive_photo(message):
+    print(message)
+    cid=message.chat.id
+    photo_url=message.photo[-1].file_id
+    caption=message.caption
+    if caption :
+        caption=caption.split("\n")
+        title=caption[0]
+        text=caption[1]
+        Duration=caption[2]
+        price=caption[3]
+        actors=caption[4]
+        DDL.insert_theater(title,photo_url,text,Duration,price,actors)
+    else:
+        cid=int(admin_id)
+        bot.send_message(cid,"❌ Error: Caption is empty. Please send all required information\n /add_photo.")
+
 
 @bot.message_handler(commands=["start"])
 def send_information(message):
@@ -57,11 +84,15 @@ def send_information(message):
 @bot.message_handler(func=lambda mesg:mesg.text=="📊 Daily / Monthly Report")
 def message_report(message):
     cid=message.chat.id
-    bot.send_message(cid,"this button is not ready")
+    if cid==int(admin_id):
+        active_user=DDL.user_active()
+    else:
+        bot.send_message(cid,"“📊 Coming soon!”")
 
 @bot.message_handler(fun=lambda mesg:mesg.text=="shop_history🛒")
 def history_shp(message):
     cid=message.chat.id
+    print(message)
     bot.send_message(cid,"this button is not ready")
 
 @bot.message_handler(func=lambda mesg:mesg.text=="☎️ Contact Us")
@@ -235,17 +266,6 @@ def buton_shop(call):
 def send_pic(message):
     cid=message.chat.id
     bot.send_message(cid,"let me check it")
-
-@bot.channel_post_handler(content_types=["photo"])
-def achive_photo(message):
-    photo_url=message.photo[-1].file_id
-    caption=message.caption.split("\n")
-    title=caption[0]
-    text=caption[1]
-    Duration=caption[2]
-    price=caption[3]
-    actors=caption[4]
-    DDL.insert_theater(title,photo_url,text,Duration,price,actors)
 
 
 @bot.message_handler(content_types=["text"])
