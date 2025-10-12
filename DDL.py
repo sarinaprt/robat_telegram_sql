@@ -24,6 +24,19 @@ def chek_customer(CHAT_ID):
         return chat_id[0]
     else:
         return None
+    
+def find_user_id(CHAT_ID):
+    config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+    conn=connection.MySQLConnection(**config)
+    cur=conn.cursor()
+    cur.execute("SELECT USER_ID FROM CUSTOMER WHERE CHAT_ID=%s",(CHAT_ID,))
+    user_id=cur.fetchone()
+    cur.close()
+    conn.close()
+    if user_id:
+        return user_id[0]
+    else:
+        return None
 
 def insert_book(title ,gener,author,file_url):
     config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
@@ -73,6 +86,7 @@ def random_books():
         return books
     else:
         return None
+    
 
 def insert_theater(title,pic_url,text,Duration,price,actors):
     config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
@@ -95,21 +109,34 @@ def theater(gener):
         return url
     else:
         return None
-    
-def user_active():
+
+def add_orders(user_id,ITEM_TYPE,quantity):
+    config={"user":"root","password":"belive_god1527","host":"localhost","database":"shop_bot"} 
+    conn=connection.MySQLConnection(**config) 
+    cur=conn.cursor()
+    cur.execute("INSERT INTO orders(user_id,ITEM_TYPE,quantity)VALUES(%s,%s,%s)",(user_id,ITEM_TYPE,quantity))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def REPORT():
     config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
     conn=connection.MySQLConnection(**config)
     cur=conn.cursor()
-    cur.execute("""select c.USER_ID,c.USERNAME from customers c
-                inner join orders o on c.id=o.user_id 
-                group by c.id
-                having date(max(o.creat_at))=date(now()) """)
+    cur.execute("""SELECT c.CHAT_ID, c.USERNAME
+                    FROM customer c
+                    INNER JOIN orders o ON c.user_id = o.user_id
+                    GROUP BY c.user_id
+                    HAVING DATE(MAX(o.creat_at)) = DATE(NOW());
+                    """)
     active=cur.fetchall()
     cur.close()
     conn.close()
     if active:
+        print(active)
         return active
-
+    else:
+        return None
 
 
 if __name__=="__main__":
@@ -121,4 +148,6 @@ if __name__=="__main__":
     file_url()
     chek_customer()
     theater()
-    user_active()
+    add_orders()
+    REPORT()
+    find_user_id()

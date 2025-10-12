@@ -73,7 +73,7 @@ def orders():
     cur.execute("""CREATE TABLE orders(
                 ord_id    INT AUTO_INCREMENT PRIMARY KEY,
                 user_id   INT NOT NULL,
-                ITEM_TYPE ENUM("📚 E-Books","🎵 Music","theaters"),
+                ITEM_TYPE ENUM("E-Books","theaters"),
                 quantity  INT DEFAULT 0,
                 creat_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN   KEY (user_id) REFERENCES CUSTOMER(USER_ID)

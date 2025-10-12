@@ -13,7 +13,7 @@ command={
 }
 
 admin_access={
-    "add_bookfile":"instruction how to add file",
+    "document":"instruction how to add file",
     "add_photo":"instruction how to add photo"}
 
 categoey=["theaters","📚 E-Books"]
@@ -22,18 +22,37 @@ products={
      "theaters" :["🎭 Comedy","🎭 Drama","🎭 Children","🎭 Musical","🎭 Historical"],
      }
 
+def check_active_befor(USERNAME,cid,NAME):
+    id=DDL.chek_customer(cid)
+    if not id:
+        DDL.customer_add(USERNAME,cid,NAME)
+
+@bot.message_handler(commands=["start"])
+def send_information(message):
+    cid=message.chat.id
+    USERNAME=message.from_user.username  
+    NAME=message.from_user.first_name 
+    markup=ReplyKeyboardMarkup(resize_keyboard=True)
+    markup.add("🛍️ Products", "shop_history🛒")
+    markup.add("📊 Daily / Monthly Report", "☎️ Contact Us")
+    check_active_befor(USERNAME,cid,NAME)
+    bot.send_message(cid,"use buttons",reply_markup=markup)
 
 @bot.message_handler(commands=["document"])
 def add_dacu(message):
     cid=message.chat.id
-    bot.send_message(cid,"add your information like \ngener:Psychology,Novel,History,Art & Music,Educational\nauthor:name_author_")
-
+    if cid==int(admin_id):
+        bot.send_message(cid,"add your information like :\ngener:Psychology,Novel,History,Art & Music,Educational\nauthor:name_author_")
+    else:
+        bot.send_message(cid,"how can i help you?")
 
 @bot.message_handler(commands=["add_photo"])
 def add_photo(message):
     cid=message.chat.id
-    bot.send_message(cid,"title\ntext\nDuration\nprice\nactors \ndont write the topic of each for example title:title ✖ only title ✔")
-
+    if cid==int(admin_id):
+        bot.send_message(cid,"title\ntext\nDuration\nprice\nactors \ndont write the topic of each for example title:title ✖ only title ✔")
+    else:
+        bot.send_message(cid,"how can i help you?")
 
 @bot.channel_post_handler(content_types=["document"])
 def channel_post(message):
@@ -67,25 +86,18 @@ def achive_photo(message):
         cid=int(admin_id)
         bot.send_message(cid,"❌ Error: Caption is empty. Please send all required information\n /add_photo.")
 
-
-@bot.message_handler(commands=["start"])
-def send_information(message):
-    cid=message.chat.id
-    USERNAME=message.from_user.username  
-    NAME=message.from_user.first_name 
-    markup=ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add("🛍️ Products", "shop_history🛒")
-    markup.add("📊 Daily / Monthly Report", "☎️ Contact Us")
-    id=DDL.chek_customer(cid)
-    if not id:
-        DDL.customer_add(USERNAME,cid,NAME)
-    bot.send_message(cid,"use buttons",reply_markup=markup)
-
 @bot.message_handler(func=lambda mesg:mesg.text=="📊 Daily / Monthly Report")
 def message_report(message):
     cid=message.chat.id
     if cid==int(admin_id):
-        active_user=DDL.user_active()
+        report=DDL.REPORT()
+        text="User Report\n\n"
+        if report:
+            for CHAT_ID,USERNAME in report:
+                text+=f"👤 User: {USERNAME or 'NoUsername'}\n🆔 ID: {CHAT_ID}\n\n"
+            bot.send_message(cid,text)
+        else:
+            bot.send_message(cid,text)
     else:
         bot.send_message(cid,"“📊 Coming soon!”")
 
@@ -139,6 +151,7 @@ def answer_call_pro(call):
 def book_send(call):
     cid=call.message.chat.id
     data=call.data.strip("📔 ")
+    DDL.add_orders(user_id=cid,ITEM_TYPE="E-Books",quantity=1)
     print(call)
     books=DDL.search_books(data)
     if books:
@@ -153,6 +166,7 @@ def book_send(call):
 @bot.callback_query_handler(func=lambda call:call.data=="random")
 def random_book(call):
     cid=call.message.chat.id
+    DDL.add_orders(user_id=cid,ITEM_TYPE="E-Books",quantity=1)
     books=DDL.random_books()#[(,)]
     if books:
         chosen=random.choice(books)#tuple
@@ -166,7 +180,9 @@ def random_book(call):
 @bot.callback_query_handler(func=lambda call:call.data=="📝 Search by Title/Author")
 def author_title(call):
     cid=call.message.chat.id
+    DDL.add_orders(user_id=cid,ITEM_TYPE="E-Books",quantity=1)
     bot.send_message(cid,"write author and title like:\n-author:author \n title:title-",parse_mode="Markdown")
+
 
 
 def get_markup_button(quantity,index,gener):
@@ -257,7 +273,17 @@ def buton_shop(call):
             pass
     elif data.startswith("buy"):
         command,quantity=data.split("_")
-        bot.send_message(cid,text=f"your total price is :{quantity}\n please pay with this card number *+++++++++*\n then send the screan shot",parse_mode="Markdown")
+        ITEM_TYPE="theaters"
+        ID_USER=DDL.find_user_id(CHAT_ID=cid)
+        if ID_USER:
+            bot.send_message(cid,text=f"your total price is :{quantity}\n please pay with this card number *+++++++++*\n then send the screan shot",parse_mode="Markdown")
+            DDL.add_orders(ID_USER,ITEM_TYPE,quantity)
+        else:
+            USERNAME=call.from_user.username  
+            NAME=call.from_user.first_name 
+            check_active_befor(USERNAME,cid,NAME)
+            bot.send_message(cid,"there is some problem try again")
+   
     elif data=="cancel":
         bot.delete_message(cid,messageid)
 
@@ -270,8 +296,12 @@ def send_pic(message):
 
 @bot.message_handler(content_types=["text"])
 def message_find(message):
+    USERNAME=message.from_user.username  
+    NAME=message.from_user.first_name 
+    cid=message.chat.id
+    check_active_befor(USERNAME,cid,NAME)
     if message.text.startswith(("Author","author")):#((text),index)
-        cid=message.chat.id
+
         text=message.text.split("\n")
         author=text[0].split(":")[-1].strip("- ").lower()
         title=text[1].split(":")[-1].strip("- ").lower()
