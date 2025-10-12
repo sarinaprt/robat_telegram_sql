@@ -59,6 +59,7 @@ def theater_ticket():
                 Duration  TIME,
                 price     DECIMAL(7,3) NOT NULL,
                 actors    NVARCHAR(50),
+                stock     int default 0 ,
                 creat_at  DATETIME DEFAULT CURRENT_TIMESTAMP
     )""")
     conn.commit()

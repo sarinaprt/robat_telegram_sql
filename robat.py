@@ -50,7 +50,7 @@ def add_dacu(message):
 def add_photo(message):
     cid=message.chat.id
     if cid==int(admin_id):
-        bot.send_message(cid,"title\ntext\nDuration\nprice\nactors \ndont write the topic of each for example title:title ✖ only title ✔")
+        bot.send_message(cid,"title\ntext\nDuration\nprice\nactors\nstock \ndont write the topic of each for example title:title ✖ only title ✔")
     else:
         bot.send_message(cid,"how can i help you?")
 
@@ -81,7 +81,8 @@ def achive_photo(message):
         Duration=caption[2]
         price=caption[3]
         actors=caption[4]
-        DDL.insert_theater(title,photo_url,text,Duration,price,actors)
+        stock=caption[5]
+        DDL.insert_theater(title,photo_url,text,Duration,price,actors,stock)
     else:
         cid=int(admin_id)
         bot.send_message(cid,"❌ Error: Caption is empty. Please send all required information\n /add_photo.")
@@ -193,7 +194,7 @@ def get_markup_button(quantity,index,gener):
     number_but=InlineKeyboardButton(text=str(quantity),callback_data="number")
     remove_but=InlineKeyboardButton(text="➖",callback_data=f"edit_{quantity-1}_{index}_{gener}"if quantity>1 else "disabled")
     next_but=InlineKeyboardButton(text="next",callback_data=f"next_{index+1}_{gener}_{quantity}")
-    buy_but=InlineKeyboardButton(text="buy",callback_data=f"buy_{quantity}")
+    buy_but=InlineKeyboardButton(text="buy",callback_data=f"buy_{quantity}_{gener}_{index}")
     previous_but=InlineKeyboardButton(text="previous",callback_data=f"previous_{index-1}_{gener}_{quantity}")
     cancel_but=InlineKeyboardButton(text="cancel",callback_data="cancel")
     markup.add(remove_but,number_but,add_but)
@@ -205,7 +206,7 @@ def get_markup_button(quantity,index,gener):
 def threar(call):
     cid=call.from_user.id
     gener=call.data.strip("🎭 ")
-    caption,pic_url,len_list=threaters(gener,0)
+    caption,pic_url,len_list,tk_id=threaters(gener,0)
     if caption is not  None and pic_url is not None:
         buttons=get_markup_button(1,0,gener)
         bot.send_photo(cid,pic_url,caption=caption,reply_markup=buttons)
@@ -226,12 +227,13 @@ def threaters(gener,index):
             price=theat[index][3]
             actors=theat[index][4]
             pic_url=theat[index][5]
+            tk_id=theat[index][6]
             caption=f"{title}\n{text}\ntime:{Duration}\nprice:{price}\nactors:{actors}"
-            return caption ,pic_url,len_list
+            return caption ,pic_url,len_list,tk_id
         else:
-            return None,None,len_list
+            return None,None,len_list,None
     else:
-        return None,None,None
+        return None,None,None,None
 
         
 @bot.callback_query_handler(func=lambda call:True)
@@ -252,7 +254,7 @@ def buton_shop(call):
         bot.answer_callback_query(call.id,"❌ Quantity cannot be less than 1")
     elif data.startswith("next"):
         command,index,gener,quantity=data.split("_")
-        caption,pic_url,len_list=threaters(gener,index)
+        caption,pic_url,len_list,tk_id=threaters(gener,index)
         if caption is not None and pic_url is not None:
             index=int(index)
             quantity=int(quantity)
@@ -265,19 +267,21 @@ def buton_shop(call):
         command,index,gener,quantity=data.split("_")
         index=int(index)
         quantity=int(quantity)
-        caption,pic_url,len_list=threaters(gener,index)
+        caption,pic_url,len_list,tk_id=threaters(gener,index)
         if caption is not None and pic_url is not None:
             markup=get_markup_button(quantity,index,gener)
             bot.edit_message_media(media=InputMediaPhoto(media=pic_url,caption=caption),chat_id=cid,message_id=messageid,reply_markup=markup)
         else:
             pass
     elif data.startswith("buy"):
-        command,quantity=data.split("_")
+        command,quantity,gener,index=data.split("_")
         ITEM_TYPE="theaters"
         ID_USER=DDL.find_user_id(CHAT_ID=cid)
+        caption,pic_url,len_list,tk_id=threaters(gener,index)
         if ID_USER:
             bot.send_message(cid,text=f"your total price is :{quantity}\n please pay with this card number *+++++++++*\n then send the screan shot",parse_mode="Markdown")
             DDL.add_orders(ID_USER,ITEM_TYPE,quantity)
+            DDL.update_quantity(quantity,tk_id)
         else:
             USERNAME=call.from_user.username  
             NAME=call.from_user.first_name 
@@ -301,11 +305,10 @@ def message_find(message):
     cid=message.chat.id
     check_active_befor(USERNAME,cid,NAME)
     if message.text.startswith(("Author","author")):#((text),index)
-
         text=message.text.split("\n")
         author=text[0].split(":")[-1].strip("- ").lower()
         title=text[1].split(":")[-1].strip("- ").lower()
-        url=DDL.file_url(author,title)
+        url=DDL.file_url_book(author,title)
         if url:
             bot.send_document(cid,url)
         else:
@@ -316,3 +319,4 @@ def message_find(message):
         bot.send_message(cid,"can i help you ?")
 
 bot.infinity_polling()
+

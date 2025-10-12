@@ -60,7 +60,7 @@ def search_books(date):
     else:
         return None
 
-def file_url(author,title):
+def file_url_book(author,title):
     config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
     conn=connection.MySQLConnection(**config)
     cur=conn.cursor()
@@ -88,11 +88,11 @@ def random_books():
         return None
     
 
-def insert_theater(title,pic_url,text,Duration,price,actors):
+def insert_theater(title,pic_url,text,Duration,price,actors,stock):
     config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
     conn=connection.MySQLConnection(**config)
     cur=conn.cursor()
-    cur.execute("INSERT INTO ticket(title,pic_url,text,Duration,price,actors)VALUES(%s,%s,%s,%s,%s,%s)",(title,pic_url,text,Duration,price,actors))
+    cur.execute("INSERT INTO ticket(title,pic_url,text,Duration,price,actors,stock)VALUES(%s,%s,%s,%s,%s,%s,%s)",(title,pic_url,text,Duration,price,actors,stock))
     conn.commit()
     cur.close()
     conn.close()
@@ -101,7 +101,7 @@ def theater(gener):
     config={"user":"root","password":"belive_god1527","host":"localhost","database":"shop_bot"}
     conn=connection.MySQLConnection(**config)
     cur=conn.cursor()
-    cur.execute("SELECT title,text,Duration,price,actors,pic_url FROM ticket WHERE gener=%s",(gener,))
+    cur.execute("SELECT title,text,Duration,price,actors,pic_url,stock FROM ticket WHERE gener=%s",(gener,))
     url=cur.fetchall()
     cur.close()
     conn.close() 
@@ -138,6 +138,14 @@ def REPORT():
     else:
         return None
 
+def update_quantity(quantity,tk_id):
+    config={"user":"root","password":"belive_god1527","host":"localhost","database":"shop_bot"}
+    conn=connection.MySQLConnection(**config)
+    cur=conn.cursor()
+    cur.execute("update ticket set stock=stock-%s where tk_id=%s",(quantity,tk_id))
+    conn.commit()
+    cur.close()
+    conn.close()
 
 if __name__=="__main__":
     search_books()
@@ -145,9 +153,10 @@ if __name__=="__main__":
     customer_add()
     insert_book()
     insert_theater()
-    file_url()
+    file_url_book()
     chek_customer()
     theater()
     add_orders()
     REPORT()
     find_user_id()
+    update_quantity()
