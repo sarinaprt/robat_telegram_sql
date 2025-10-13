@@ -101,7 +101,7 @@ def theater(gener):
     config={"user":"root","password":"belive_god1527","host":"localhost","database":"shop_bot"}
     conn=connection.MySQLConnection(**config)
     cur=conn.cursor()
-    cur.execute("SELECT title,text,Duration,price,actors,pic_url,stock FROM ticket WHERE gener=%s",(gener,))
+    cur.execute("SELECT title,text,Duration,price,actors,pic_url,tk_id FROM ticket WHERE gener=%s",(gener,))
     url=cur.fetchall()
     cur.close()
     conn.close() 
@@ -147,6 +147,19 @@ def update_quantity(quantity,tk_id):
     cur.close()
     conn.close()
 
+def check_stock(tk_id):
+    config={"user":"root","password":"belive_god1527","host":"localhost","database":"shop_bot"}
+    conn=connection.MySQLConnection(**config)
+    cur=conn.cursor()
+    cur.execute("select stock from ticket where tk_id=%s",(tk_id,))
+    stock=cur.fetchone()
+    cur.close()
+    conn.close()
+    if stock:
+        return stock[0]
+    else:
+        return None
+
 if __name__=="__main__":
     search_books()
     random_books()
@@ -160,3 +173,4 @@ if __name__=="__main__":
     REPORT()
     find_user_id()
     update_quantity()
+    check_stock()

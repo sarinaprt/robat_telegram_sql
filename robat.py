@@ -186,21 +186,30 @@ def author_title(call):
 
 
 
-def get_markup_button(quantity,index,gener):
+def get_markup_button(quantity,index,gener,tk_id):
     quantity=int(quantity)
     index=int(index)
+    stock=DDL.check_stock(tk_id)
     markup=InlineKeyboardMarkup()
-    add_but=InlineKeyboardButton(text="➕️" , callback_data=f"edit_{quantity+1}_{index}_{gener}")
-    number_but=InlineKeyboardButton(text=str(quantity),callback_data="number")
-    remove_but=InlineKeyboardButton(text="➖",callback_data=f"edit_{quantity-1}_{index}_{gener}"if quantity>1 else "disabled")
-    next_but=InlineKeyboardButton(text="next",callback_data=f"next_{index+1}_{gener}_{quantity}")
-    buy_but=InlineKeyboardButton(text="buy",callback_data=f"buy_{quantity}_{gener}_{index}")
-    previous_but=InlineKeyboardButton(text="previous",callback_data=f"previous_{index-1}_{gener}_{quantity}")
-    cancel_but=InlineKeyboardButton(text="cancel",callback_data="cancel")
-    markup.add(remove_but,number_but,add_but)
-    markup.add(previous_but,buy_but,next_but)
-    markup.add(cancel_but)
+    if stock is None:
+        pass
+    if stock<=0:
+        markup.add(InlineKeyboardButton("🚫 Sold Out", callback_data="disabled"))
+        return markup
+    if quantity>stock:
+        quantity=stock
+        add_but=InlineKeyboardButton(text="➕️" , callback_data=f"edit_{quantity+1}_{index}_{gener}")
+        number_but=InlineKeyboardButton(text=str(quantity),callback_data="number")
+        remove_but=InlineKeyboardButton(text="➖",callback_data=f"edit_{quantity-1}_{index}_{gener}"if quantity>1 else "disabled")
+        next_but=InlineKeyboardButton(text="next",callback_data=f"next_{index+1}_{gener}_{quantity}")
+        buy_but=InlineKeyboardButton(text="buy",callback_data=f"buy_{quantity}_{gener}_{index}")
+        previous_but=InlineKeyboardButton(text="previous",callback_data=f"previous_{index-1}_{gener}_{quantity}")
+        cancel_but=InlineKeyboardButton(text="cancel",callback_data="cancel")
+        markup.add(remove_but,number_but,add_but)
+        markup.add(previous_but,buy_but,next_but)
+        markup.add(cancel_but)
     return markup
+
 
 @bot.callback_query_handler(func=lambda call:call.data in products["theaters"])
 def threar(call):
@@ -208,7 +217,7 @@ def threar(call):
     gener=call.data.strip("🎭 ")
     caption,pic_url,len_list,tk_id=threaters(gener,0)
     if caption is not  None and pic_url is not None:
-        buttons=get_markup_button(1,0,gener)
+        buttons=get_markup_button(1,0,gener,tk_id)
         bot.send_photo(cid,pic_url,caption=caption,reply_markup=buttons)
     else:
         bot.send_message(cid,"this gener is emoty")
@@ -245,21 +254,23 @@ def buton_shop(call):
     print(data)
     print(f"{call.from_user.id}:{call.message.chat.id}")
     if data.startswith("edit"):
+        caption,pic_url,len_list,tk_id=threaters(gener,index)
         command,quantity,index,gener=data.split("_")
         quantity=int(quantity)
         if quantity<1:
             bot.answer_callback_query(call.id,"❌ Quantity cannot be less than 1")
-        bot.edit_message_reply_markup(chat_id=cid,message_id=messageid,reply_markup=get_markup_button(quantity,index,gener))
+        else:
+            bot.edit_message_reply_markup(chat_id=cid,message_id=messageid,reply_markup=get_markup_button(quantity,index,gener,tk_id))
     elif data=="disabled":
         bot.answer_callback_query(call.id,"❌ Quantity cannot be less than 1")
     elif data.startswith("next"):
         command,index,gener,quantity=data.split("_")
+        index=int(index)
+        quantity=int(quantity)
         caption,pic_url,len_list,tk_id=threaters(gener,index)
         if caption is not None and pic_url is not None:
-            index=int(index)
-            quantity=int(quantity)
             len_list=int(len_list)
-            markup=get_markup_button(quantity,index,gener)
+            markup=get_markup_button(quantity,index,gener,tk_id)
             bot.edit_message_media(media=InputMediaPhoto(media=pic_url,caption=caption),chat_id=cid,message_id=messageid,reply_markup=markup)
         else:
             bot.answer_callback_query(call.id, "❌ No more items.")            
@@ -269,19 +280,21 @@ def buton_shop(call):
         quantity=int(quantity)
         caption,pic_url,len_list,tk_id=threaters(gener,index)
         if caption is not None and pic_url is not None:
-            markup=get_markup_button(quantity,index,gener)
+            markup=get_markup_button(quantity,index,gener,tk_id)
             bot.edit_message_media(media=InputMediaPhoto(media=pic_url,caption=caption),chat_id=cid,message_id=messageid,reply_markup=markup)
         else:
             pass
     elif data.startswith("buy"):
         command,quantity,gener,index=data.split("_")
+        quantity=int(quantity)
+        index=int(index)
         ITEM_TYPE="theaters"
         ID_USER=DDL.find_user_id(CHAT_ID=cid)
         caption,pic_url,len_list,tk_id=threaters(gener,index)
         if ID_USER:
             bot.send_message(cid,text=f"your total price is :{quantity}\n please pay with this card number *+++++++++*\n then send the screan shot",parse_mode="Markdown")
             DDL.add_orders(ID_USER,ITEM_TYPE,quantity)
-            DDL.update_quantity(quantity,tk_id)
+            DDL.update_quantity(quantity,int(tk_id))
         else:
             USERNAME=call.from_user.username  
             NAME=call.from_user.first_name 
