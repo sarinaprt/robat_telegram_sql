@@ -195,19 +195,18 @@ def get_markup_button(quantity,index,gener,tk_id):
         pass
     if stock<=0:
         markup.add(InlineKeyboardButton("🚫 Sold Out", callback_data="disabled"))
-        return markup
     if quantity>stock:
         quantity=stock
-        add_but=InlineKeyboardButton(text="➕️" , callback_data=f"edit_{quantity+1}_{index}_{gener}")
-        number_but=InlineKeyboardButton(text=str(quantity),callback_data="number")
-        remove_but=InlineKeyboardButton(text="➖",callback_data=f"edit_{quantity-1}_{index}_{gener}"if quantity>1 else "disabled")
-        next_but=InlineKeyboardButton(text="next",callback_data=f"next_{index+1}_{gener}_{quantity}")
-        buy_but=InlineKeyboardButton(text="buy",callback_data=f"buy_{quantity}_{gener}_{index}")
-        previous_but=InlineKeyboardButton(text="previous",callback_data=f"previous_{index-1}_{gener}_{quantity}")
-        cancel_but=InlineKeyboardButton(text="cancel",callback_data="cancel")
-        markup.add(remove_but,number_but,add_but)
-        markup.add(previous_but,buy_but,next_but)
-        markup.add(cancel_but)
+    add_but=InlineKeyboardButton(text="➕️" , callback_data=f"edit_{quantity+1}_{index}_{gener}")
+    number_but=InlineKeyboardButton(text=str(quantity),callback_data="number")
+    remove_but=InlineKeyboardButton(text="➖",callback_data=f"edit_{quantity-1}_{index}_{gener}"if quantity>1 else "disabled")
+    next_but=InlineKeyboardButton(text="next",callback_data=f"next_{index+1}_{gener}_{quantity}")
+    buy_but=InlineKeyboardButton(text="buy",callback_data=f"buy_{quantity}_{gener}_{index}")
+    previous_but=InlineKeyboardButton(text="previous",callback_data=f"previous_{index-1}_{gener}_{quantity}")
+    cancel_but=InlineKeyboardButton(text="cancel",callback_data="cancel")
+    markup.add(remove_but,number_but,add_but)
+    markup.add(previous_but,buy_but,next_but)
+    markup.add(cancel_but)
     return markup
 
 
