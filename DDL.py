@@ -101,7 +101,7 @@ def theater(gener):
     config={"user":"root","password":"belive_god1527","host":"localhost","database":"shop_bot"}
     conn=connection.MySQLConnection(**config)
     cur=conn.cursor()
-    cur.execute("SELECT title,text,Duration,price,actors,pic_url,tk_id FROM ticket WHERE gener=%s",(gener,))
+    cur.execute("SELECT title,text,Duration,price,actors,pic_url,tk_id,stock FROM ticket WHERE gener=%s",(gener,))
     url=cur.fetchall()
     cur.close()
     conn.close() 
