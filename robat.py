@@ -85,6 +85,7 @@ def channel_post(message):
             author=list_info[1].split(":")[-1].strip().lower()
             DDL.insert_book(name_douc,gener,author,file_id)
         else:
+            bot.delete_message(message.chat.id,message.message_id)
             cid=int(admin_id)
             bot.send_message(cid,"❌ Error: Caption is empty. Please send all required information\n /document.")
     except Exception as e:
@@ -110,6 +111,7 @@ def achive_photo(message):
             stock=caption[5]
             DDL.insert_theater(title,photo_url,text,Duration,price,actors,stock)
         else:
+            bot.delete_message(message.chat.id,message.message_id)
             cid=int(admin_id)
             bot.send_message(cid,"❌ Error: Caption is empty. Please send all required information\n /add_photo.")
     except Exception as e:
