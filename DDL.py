@@ -112,12 +112,12 @@ def random_books():
     except Exception as e :
         print(f"problem in random_book {e}⚠️ ")
 
-def insert_theater(title,pic_url,text,Duration,price,actors,stock):
+def insert_theater(title,pic_url,text,Duration,price,actors,stock,gener):
     try:
         config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
         conn=connection.MySQLConnection(**config)
         cur=conn.cursor()
-        cur.execute("INSERT INTO ticket(title,pic_url,text,Duration,price,actors,stock)VALUES(%s,%s,%s,%s,%s,%s,%s)",(title,pic_url,text,Duration,price,actors,stock))
+        cur.execute("INSERT INTO ticket(title,pic_url,text,Duration,price,actors,stock,gener)VALUES(%s,%s,%s,%s,%s,%s,%s,%s)",(title,pic_url,text,Duration,price,actors,stock,gener))
         conn.commit()
         cur.close()
         conn.close()

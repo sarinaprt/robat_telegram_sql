@@ -18,7 +18,7 @@ command={
 categoey=["theaters","📚 E-Books"]
 products={
     "📚 E-Books":["📔 Psychology","📔 Novel","📔 History","📔 Art & Music","📔 Educational"],
-     "theaters" :["🎭 Comedy","🎭 Drama","🎭 Children","🎭 Musical","🎭 Historical"],
+     "theaters" :["🎭 Comedy","🎭 Drama","🎭 modern tragedy "],
      }
 
 def check_active_befor(USERNAME,cid,NAME):
@@ -67,7 +67,7 @@ def add_photo(message):
     try:
         cid=message.chat.id
         if cid==int(admin_id):
-            bot.send_message(cid,"title\ntext\nDuration\nprice\nactors\nstock \ndont write the topic of each for example title:title ✖ only title ✔")
+            bot.send_message(cid,"title\ngener\ntext\nDuration\nprice\nactors\nstock \ndont write the topic of each for example title:title ✖ only title ✔")
         else:
             bot.send_message(cid,"how can i help you?/help")
     except Exception as e:
@@ -104,12 +104,13 @@ def achive_photo(message):
         if caption :
             caption=caption.split("\n")
             title=caption[0]
-            text=caption[1]
-            Duration=caption[2]
-            price=caption[3]
-            actors=caption[4]
-            stock=caption[5]
-            DDL.insert_theater(title,photo_url,text,Duration,price,actors,stock)
+            gener=caption[1]
+            text=caption[2]
+            Duration=caption[3]
+            price=caption[4]
+            actors=caption[5]
+            stock=caption[6]
+            DDL.insert_theater(title,photo_url,text,Duration,price,actors,stock,gener)
         else:
             bot.delete_message(message.chat.id,message.message_id)
             cid=int(admin_id)
@@ -276,6 +277,7 @@ def get_markup_button(quantity,index,gener,tk_id,price):
 @bot.callback_query_handler(func=lambda call:call.data in products["theaters"])
 def threar(call):
     try:
+        print(call)
         cid=call.from_user.id
         gener=call.data.strip("🎭 ")
         caption,pic_url,len_list,tk_id,price=threaters(gener,0)
@@ -305,9 +307,9 @@ def threaters(gener,index):
             caption=f"{title}\n{text}\ntime:{Duration}\nprice:{price}\nactors:{actors}\nstock:{stock}"
             return caption ,pic_url,len_list,tk_id,price
         else:
-            return None,None,len_list,None
+            return None,None,len_list,None,None
     else:
-        return None,None,None,None
+        return None,None,None,None,None
 
         
 @bot.callback_query_handler(func=lambda call:True)
