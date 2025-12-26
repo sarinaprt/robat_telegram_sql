@@ -4,7 +4,7 @@ from mysql.connector import connection
 
 def customer_add(USERNAME,CHAT_ID,NAME):
     try:
-        config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+        config={"user":"root","host":"localhost","password":".......","database":"shop_bot"}
         conn=connection.MySQLConnection(**config)
         cur=conn.cursor()
         cur.execute("INSERT INTO CUSTOMER(USERNAME,CHAT_ID,NAME)VALUES(%s,%s,%s)",(USERNAME,CHAT_ID,NAME))
@@ -16,7 +16,7 @@ def customer_add(USERNAME,CHAT_ID,NAME):
 
 def chek_customer(CHAT_ID):
     try:
-        config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+        config={"user":"root","host":"localhost","password":".........","database":"shop_bot"}
         conn=connection.MySQLConnection(**config)
         cur=conn.cursor()
         cur.execute("SELECT CHAT_ID FROM customer where CHAT_ID=%s",(CHAT_ID,))
@@ -34,7 +34,7 @@ def chek_customer(CHAT_ID):
     
 def find_user_id(CHAT_ID):
     try:
-        config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+        config={"user":"root","host":"localhost","password":"........","database":"shop_bot"}
         conn=connection.MySQLConnection(**config)
         cur=conn.cursor()
         cur.execute("SELECT USER_ID FROM CUSTOMER WHERE CHAT_ID=%s",(CHAT_ID,))
@@ -50,7 +50,7 @@ def find_user_id(CHAT_ID):
 
 def insert_book(title ,gener,author,file_url):
     try:
-        config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+        config={"user":"root","host":"localhost","password":".........","database":"shop_bot"}
         conn=connection.MySQLConnection(**config)
         cur=conn.cursor()
         cur.execute("INSERT INTO BOOKS(title ,gener,author,file_url)VALUES (%s,%s,%s,%s)",(title ,gener,author,file_url))
@@ -63,7 +63,7 @@ def insert_book(title ,gener,author,file_url):
 
 def search_books(date):
     try:
-        config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+        config={"user":"root","host":"localhost","password":".........","database":"shop_bot"}
         conn=connection.MySQLConnection(**config)
         cur=conn.cursor()
         cur.execute("SELECT author,GROUP_CONCAT(title) as titles FROM books WHERE gener=%s GROUP BY author" ,(date,))
@@ -80,7 +80,7 @@ def search_books(date):
 
 def file_url_book(author,title):
     try:
-        config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+        config={"user":"root","host":"localhost","password":".........","database":"shop_bot"}
         conn=connection.MySQLConnection(**config)
         cur=conn.cursor()
         cur.execute("SELECT file_url FROM books WHERE author=%s AND title=%s",(author,title))
@@ -97,7 +97,7 @@ def file_url_book(author,title):
     
 def random_books():
     try:
-        config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+        config={"user":"root","host":"localhost","password":"........","database":"shop_bot"}
         conn=connection.MySQLConnection(**config)
         cur=conn.cursor()
         cur.execute("SELECT title,author,file_url FROM books ")
@@ -114,7 +114,7 @@ def random_books():
 
 def insert_theater(title,pic_url,text,Duration,price,actors,stock,gener):
     try:
-        config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+        config={"user":"root","host":"localhost","password":".........","database":"shop_bot"}
         conn=connection.MySQLConnection(**config)
         cur=conn.cursor()
         cur.execute("INSERT INTO ticket(title,pic_url,text,Duration,price,actors,stock,gener)VALUES(%s,%s,%s,%s,%s,%s,%s,%s)",(title,pic_url,text,Duration,price,actors,stock,gener))
@@ -127,7 +127,7 @@ def insert_theater(title,pic_url,text,Duration,price,actors,stock,gener):
                 
 def theater(gener):
     try:
-        config={"user":"root","password":"belive_god1527","host":"localhost","database":"shop_bot"}
+        config={"user":"root","password":"..........","host":"localhost","database":"shop_bot"}
         conn=connection.MySQLConnection(**config)
         cur=conn.cursor()
         cur.execute("SELECT title,text,Duration,price,actors,pic_url,tk_id,stock FROM ticket WHERE gener=%s",(gener,))
@@ -144,7 +144,7 @@ def theater(gener):
 
 def add_orders(user_id,ITEM_TYPE,quantity):
     try:
-        config={"user":"root","password":"belive_god1527","host":"localhost","database":"shop_bot"} 
+        config={"user":"root","password":".........","host":"localhost","database":"shop_bot"} 
         conn=connection.MySQLConnection(**config) 
         cur=conn.cursor()
         cur.execute("INSERT INTO orders(user_id,ITEM_TYPE,quantity)VALUES(%s,%s,%s)",(user_id,ITEM_TYPE,quantity))
@@ -156,7 +156,7 @@ def add_orders(user_id,ITEM_TYPE,quantity):
 
 def REPORT():
     try:
-        config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+        config={"user":"root","host":"localhost","password":"........","database":"shop_bot"}
         conn=connection.MySQLConnection(**config)
         cur=conn.cursor()
         cur.execute("""SELECT c.CHAT_ID, c.USERNAME
@@ -178,7 +178,7 @@ def REPORT():
 
 def update_quantity(quantity,tk_id):
     try:
-        config={"user":"root","password":"belive_god1527","host":"localhost","database":"shop_bot"}
+        config={"user":"root","password":"........","host":"localhost","database":"shop_bot"}
         conn=connection.MySQLConnection(**config)
         cur=conn.cursor()
         cur.execute("update ticket set stock=stock-%s where tk_id=%s",(quantity,tk_id))
@@ -190,7 +190,7 @@ def update_quantity(quantity,tk_id):
 
 def check_stock(tk_id):
     try:
-        config={"user":"root","password":"belive_god1527","host":"localhost","database":"shop_bot"}
+        config={"user":"root","password":"..........","host":"localhost","database":"shop_bot"}
         conn=connection.MySQLConnection(**config)
         cur=conn.cursor()
         cur.execute("select stock from ticket where tk_id=%s",(tk_id,))
