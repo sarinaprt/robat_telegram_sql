@@ -2,7 +2,7 @@ from mysql.connector import connection
 
 def database_exsist(database):
     try:
-        config={"user":"root","host":"localhost","password":"belive_god1527"}
+        config={"user":"root","host":"localhost","password":"......"}
         conn=connection.MySQLConnection(**config)
         cur=conn.cursor()
         cur.execute(f"DROP DATABASE IF EXISTS  {database}")
@@ -16,7 +16,7 @@ def database_exsist(database):
 
 def customers():
     try:
-        config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+        config={"user":"root","host":"localhost","password":".......","database":"shop_bot"}
         conn=connection.MySQLConnection(**config)
         cur=conn.cursor()
         cur.execute("""CREATE TABLE CUSTOMER(
@@ -37,7 +37,7 @@ def customers():
 
 def book_info():
     try:
-        config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+        config={"user":"root","host":"localhost","password":".......","database":"shop_bot"}
         conn=connection.MySQLConnection(**config)
         cur=conn.cursor()
         cur.execute("""CREATE TABLE BOOKS(
@@ -59,7 +59,7 @@ def book_info():
 
 def theater_ticket():
     try:
-        config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+        config={"user":"root","host":"localhost","password":".......","database":"shop_bot"}
         conn=connection.MySQLConnection(**config)
         cur=conn.cursor()
         cur.execute("""CREATE TABLE ticket(
@@ -83,7 +83,7 @@ def theater_ticket():
 
 def orders():
     try:
-        config={"user":"root","host":"localhost","password":"belive_god1527","database":"shop_bot"}
+        config={"user":"root","host":"localhost","password":"........","database":"shop_bot"}
         conn=connection.MySQLConnection(**config)
         cur=conn.cursor()
         cur.execute("""CREATE TABLE orders(
